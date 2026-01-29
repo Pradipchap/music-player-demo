@@ -64,7 +64,13 @@ class AudioManager {
   }
 
   async play() {
-    if (this.isPlaying) return;
+    console.log("ispl", this.isPlaying);
+
+    if (this.isPlaying) {
+      this.stop();
+      this.isPlaying = false;
+      this.resumeTime = 0;
+    }
     const audioContext = this.getAudioContext();
     //checking if context is suspended
     if (audioContext?.state === "suspended") {
@@ -82,6 +88,12 @@ class AudioManager {
       }
     }
     this.isPlaying = true;
+
+    return { duration: this.getDuration() };
+  }
+
+  stop() {
+    this.source?.stop();
   }
 
   pause = () => {

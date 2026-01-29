@@ -1,38 +1,29 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import { audioManager } from "@/audio/audioManager";
-import { ThemedText } from "@/components/themed-text";
+import { MusicCard } from "@/components/cards/MusicCards/MusicCardHorizontal";
 import { ThemedView } from "@/components/themed-view";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { demoPlaylist } from "@/services/audioLibrary";
+import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
+import { FlatList, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const playAudio = async () => {
-    audioManager.loadAudio({ id: demoPlaylist[0].id, audioUrl: demoPlaylist[1].url }).then(() => {
-      audioManager.play();
-    });
-  };
+  const { playTrack } = useAudioPlayer();
+  const isPlaying = useGetIsPlaying();
+  const currentTrack = useGetCurrentTrack();
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText>Hello</ThemedText>
-        <TouchableOpacity onPress={playAudio}>
-          <ThemedText>Play</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => audioManager.volumeUp()}>
-          <ThemedText>Volume Up</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => audioManager.volumeDown()}>
-          <ThemedText>Volume Up</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            audioManager.togglePlay();
-          }}
-        >
-          <ThemedText>Toggle</ThemedText>
-        </TouchableOpacity>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={demoPlaylist}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <MusicCard isPlaying={isPlaying && currentTrack?.id === item.id} onPress={() => playTrack(item)} {...item} />
+          )}
+          style={{ width: "100%" }}
+        />
       </SafeAreaView>
     </ThemedView>
   );

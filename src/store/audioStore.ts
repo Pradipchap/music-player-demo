@@ -16,3 +16,9 @@ export const usePlayerStore = create<PlayerState>(set => ({
   currentTrack: null,
   set: v => set(v)
 }));
+
+export const useSetPlayer = () => usePlayerStore(state => state.set);
+export const useGetCurrentTrack = () => usePlayerStore(state => state.currentTrack);
+export const useGetIsPlaying = () => usePlayerStore(state => state.isPlaying);
+export const useGetPosition = () => usePlayerStore(state => state.position);
+export const useGetDuration = () => usePlayerStore(state => state.duration);
