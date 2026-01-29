@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { AudioBufferSourceNode, AudioContext, GainNode } from "react-native-audio-api";
 import { ICurrentAudioBuffer, ILoadAudio } from "./audio.types";
 
@@ -18,12 +19,12 @@ class AudioManager {
     if (!this.audioCtx) {
       this.audioCtx = new AudioContext();
       this.gainNode = this.audioCtx.createGain();
-      return;
     }
     return this.audioCtx;
   }
 
   private constructor() {
+    if (Platform.OS === "web") return;
     this.getAudioContext();
   }
 
@@ -64,8 +65,6 @@ class AudioManager {
   }
 
   async play() {
-    console.log("ispl", this.isPlaying);
-
     if (this.isPlaying) {
       this.stop();
       this.isPlaying = false;
