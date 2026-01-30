@@ -4,17 +4,19 @@ import { useBottomPlayerSheetStore } from "@/store/player-bottom-sheet-store";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
+import { BottomSheetPlayer } from "./bottom-sheet-player";
+import CustomIcon from "./Icon";
 import { ThemedText } from "./themed-text";
 
 export const MiniPlayer = () => {
   const { setShowPlayerSheet } = useBottomPlayerSheetStore();
   const currentTrack = useGetCurrentTrack();
-  const { togglePlayPause } = useAudioPlayer();
+  const { togglePlayPause, handleNext, handlePrev } = useAudioPlayer();
   const isPlaying = useGetIsPlaying();
   const onMiniPlayerPress = () => {
-    setShowPlayerSheet(true);
+    setShowPlayerSheet({ isPlayerVisible: true, children: <BottomSheetPlayer /> });
   };
-  const onNext = () => {};
+
   if (!currentTrack) return null;
   const { thumbnail, title, artist } = currentTrack;
 
@@ -32,15 +34,16 @@ export const MiniPlayer = () => {
       </View>
 
       <View style={styles.controls}>
+        <Pressable onPress={handlePrev} hitSlop={10}>
+          <CustomIcon name="Prev" size={28} />
+        </Pressable>
         <Pressable hitSlop={10} onPress={togglePlayPause}>
-          <Ionicons name={isPlaying ? "pause" : "play"} size={28} />
+          <Ionicons name={isPlaying ? "pause" : "play"} size={30} />
         </Pressable>
 
-        {onNext && (
-          <Pressable onPress={onNext} hitSlop={10}>
-            <Ionicons name="play-skip-forward" size={24} />
-          </Pressable>
-        )}
+        <Pressable onPress={handleNext} hitSlop={10}>
+          <CustomIcon name="Next" size={28} />
+        </Pressable>
       </View>
     </Pressable>
   );

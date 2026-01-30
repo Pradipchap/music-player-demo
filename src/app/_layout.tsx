@@ -4,6 +4,7 @@ import { useColorScheme } from "react-native";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import AppTabs from "@/components/app-tabs";
+import { BottomSheet } from "@/components/bottom-sheet";
 import { MiniPlayer } from "@/components/floating-mini-player";
 import { useHandleQueue } from "@/hooks/use-handle-queue";
 
@@ -15,6 +16,7 @@ export default function TabLayout() {
       <AnimatedSplashOverlay />
       <AppTabs />
       <MiniPlayer />
+      <BottomSheet />
     </ThemeProvider>
   );
 }
