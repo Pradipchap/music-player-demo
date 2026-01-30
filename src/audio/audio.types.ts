@@ -5,6 +5,7 @@ export interface ITrack {
   url: string;
   title?: string;
   artist?: string;
+  thumbnail: string;
 }
 export interface ILoadAudio {
   id: string;

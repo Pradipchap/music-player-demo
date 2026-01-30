@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { AudioBufferSourceNode, AudioContext, GainNode } from "react-native-audio-api";
 import { ICurrentAudioBuffer, ILoadAudio } from "./audio.types";
 
@@ -9,7 +10,10 @@ class AudioManager {
   private isPlaying = false;
   private gainNode: GainNode | null = null;
   private source?: AudioBufferSourceNode = undefined;
-  private queue: ILoadAudio[] | null = null;
+
+  private isManualStop = false;
+
+  audioEndedListener?: () => void;
 
   private startTime = 0;
   private resumeTime = 0;
@@ -18,12 +22,12 @@ class AudioManager {
     if (!this.audioCtx) {
       this.audioCtx = new AudioContext();
       this.gainNode = this.audioCtx.createGain();
-      return;
     }
     return this.audioCtx;
   }
 
   private constructor() {
+    if (Platform.OS === "web") return;
     this.getAudioContext();
   }
 
@@ -64,7 +68,11 @@ class AudioManager {
   }
 
   async play() {
-    if (this.isPlaying) return;
+    if (this.isPlaying) {
+      this.stop();
+      this.isPlaying = false;
+      this.resumeTime = 0;
+    }
     const audioContext = this.getAudioContext();
     //checking if context is suspended
     if (audioContext?.state === "suspended") {
@@ -79,13 +87,28 @@ class AudioManager {
         this.source.connect(this.gainNode).connect(audioContext?.destination);
         this.startTime = audioContext.currentTime - this.resumeTime;
         this.source.start(0, this.resumeTime);
+        // this.source.loop = true;
       }
+      this.source.onEnded = () => {
+        if (this.isManualStop) return;
+        this.isPlaying = false;
+        this.audioEndedListener?.();
+      };
     }
+
     this.isPlaying = true;
+
+    return { duration: this.getDuration() };
+  }
+
+  stop() {
+    this.isManualStop = true;
+    this.source?.stop();
   }
 
   pause = () => {
     if (!this.isPlaying || !this.audioCtx) return;
+    this.isManualStop = true;
     this.source?.stop();
     this.resumeTime = this.audioCtx.currentTime - this.startTime;
     this.isPlaying = false;
