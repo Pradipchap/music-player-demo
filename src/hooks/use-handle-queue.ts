@@ -6,9 +6,11 @@ import { useAudioPlayer } from "./use-audio-player";
 
 export const useHandleQueue = () => {
   const repeatMode = useGetRepeatMode();
-  const { resumeTrack, handleNext } = useAudioPlayer();
+  const { resumeTrack, handleNext, closeIsPlaying } = useAudioPlayer();
 
   const onAudioEnd = useCallback(() => {
+    closeIsPlaying();
+
     switch (repeatMode) {
       case REPEAT_MODE.TRACK_LOOP:
         resumeTrack();

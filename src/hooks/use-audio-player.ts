@@ -28,6 +28,10 @@ export function useAudioPlayer() {
     });
   };
 
+  const closeIsPlaying = useCallback(() => {
+    set({ isPlaying: false });
+  }, []);
+
   const pauseTrack = () => {
     audioManager.pause();
     set({ isPlaying: false });
@@ -62,5 +66,5 @@ export function useAudioPlayer() {
     }
   };
 
-  return { playTrack, pauseTrack, togglePlayPause, resumeTrack, handleNext, handlePrev };
+  return { playTrack, pauseTrack, togglePlayPause, resumeTrack, handleNext, handlePrev, closeIsPlaying };
 }

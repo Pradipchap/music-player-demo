@@ -11,6 +11,8 @@ class AudioManager {
   private gainNode: GainNode | null = null;
   private source?: AudioBufferSourceNode = undefined;
 
+  private isManualStop = false;
+
   audioEndedListener?: () => void;
 
   private startTime = 0;
@@ -88,6 +90,8 @@ class AudioManager {
         // this.source.loop = true;
       }
       this.source.onEnded = () => {
+        if (this.isManualStop) return;
+        this.isPlaying = false;
         this.audioEndedListener?.();
       };
     }
@@ -98,11 +102,13 @@ class AudioManager {
   }
 
   stop() {
+    this.isManualStop = true;
     this.source?.stop();
   }
 
   pause = () => {
     if (!this.isPlaying || !this.audioCtx) return;
+    this.isManualStop = true;
     this.source?.stop();
     this.resumeTime = this.audioCtx.currentTime - this.startTime;
     this.isPlaying = false;
