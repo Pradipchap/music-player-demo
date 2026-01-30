@@ -1,20 +1,30 @@
 import { MusicCard } from "@/components/cards/MusicCards/MusicCardHorizontal";
+import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { demoPlaylist } from "@/services/audioLibrary";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
-import { FlatList, StyleSheet } from "react-native";
+import { useSetQueue } from "@/store/queue-store";
+import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { playTrack } = useAudioPlayer();
   const isPlaying = useGetIsPlaying();
   const currentTrack = useGetCurrentTrack();
+  const add = useSetQueue();
+
+  const addAllToQueue = () => {
+    add(demoPlaylist.slice(1, 4));
+  };
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        <TouchableOpacity onPress={addAllToQueue}>
+          <ThemedText>add all to queue</ThemedText>
+        </TouchableOpacity>
         <FlatList
           showsVerticalScrollIndicator={false}
           data={demoPlaylist}

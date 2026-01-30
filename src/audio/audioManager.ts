@@ -10,7 +10,8 @@ class AudioManager {
   private isPlaying = false;
   private gainNode: GainNode | null = null;
   private source?: AudioBufferSourceNode = undefined;
-  private queue: ILoadAudio[] | null = null;
+
+  audioEndedListener?: () => void;
 
   private startTime = 0;
   private resumeTime = 0;
@@ -84,8 +85,13 @@ class AudioManager {
         this.source.connect(this.gainNode).connect(audioContext?.destination);
         this.startTime = audioContext.currentTime - this.resumeTime;
         this.source.start(0, this.resumeTime);
+        // this.source.loop = true;
       }
+      this.source.onEnded = () => {
+        this.audioEndedListener?.();
+      };
     }
+
     this.isPlaying = true;
 
     return { duration: this.getDuration() };
