@@ -1,4 +1,5 @@
 import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { useSeekMusic } from "@/hooks/use-seek-music";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
 import Slider from "@react-native-community/slider";
 import React from "react";
@@ -28,20 +29,7 @@ export const BottomSheetPlayer = () => {
         </ThemedText>
       </View>
 
-      <Slider
-        value={0}
-        minimumValue={0}
-        maximumValue={120}
-        onSlidingComplete={() => {}}
-        minimumTrackTintColor="#1DB954"
-        maximumTrackTintColor="#999"
-        thumbTintColor="#1DB954"
-      />
-
-      <View style={styles.timeRow}>
-        <ThemedText style={styles.time}>{formatTime(1)}</ThemedText>
-        <ThemedText style={styles.time}>{formatTime(120)}</ThemedText>
-      </View>
+      <Seeker />
 
       <View style={styles.controls}>
         <TouchableOpacity onPress={handlePrev} style={styles.mute}>
@@ -72,6 +60,27 @@ function formatTime(sec: number) {
   return `${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
+function Seeker() {
+  const { duration, currentTime, onSeek } = useSeekMusic();
+
+  return (
+    <>
+      <Slider
+        value={currentTime}
+        minimumValue={0}
+        maximumValue={duration}
+        onSlidingComplete={onSeek}
+        minimumTrackTintColor="#1DB954"
+        maximumTrackTintColor="#999"
+        thumbTintColor="#1DB954"
+      />
+      <View style={styles.timeRow}>
+        <ThemedText style={styles.time}>{formatTime(currentTime)}</ThemedText>
+        <ThemedText style={styles.time}>{formatTime(duration)}</ThemedText>
+      </View>
+    </>
+  );
+}
 const styles = StyleSheet.create({
   container: {
     padding: 16,
