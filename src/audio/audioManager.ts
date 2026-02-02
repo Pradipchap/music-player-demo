@@ -91,6 +91,7 @@ class AudioManager {
       }
       this.source.onEnded = () => {
         if (this.isManualStop) return;
+        this.isManualStop = false;
         this.isPlaying = false;
         this.audioEndedListener?.();
       };
@@ -103,6 +104,10 @@ class AudioManager {
 
   stop() {
     this.isManualStop = true;
+    this.source?.stop();
+  }
+  autoStop() {
+    this.isManualStop = false;
     this.source?.stop();
   }
 

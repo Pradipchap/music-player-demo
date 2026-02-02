@@ -2,7 +2,7 @@ import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
 import Slider from "@react-native-community/slider";
 import React from "react";
-import { Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import CustomIcon from "./Icon";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
@@ -11,10 +11,10 @@ const SCREEN_HEIGHT = Dimensions.get("screen").height;
 
 export const BottomSheetPlayer = () => {
   const currentTrack = useGetCurrentTrack();
-  const { togglePlayPause, handleNext, handlePrev } = useAudioPlayer();
+  const { togglePlayPause, handleNext, handlePrev, handleShuffle } = useAudioPlayer();
   const isPlaying = useGetIsPlaying();
   if (!currentTrack) return;
-  const { thumbnail, title, artist } = currentTrack;
+  const { title, artist } = currentTrack;
 
   return (
     <ThemedView style={styles.container}>
@@ -44,32 +44,23 @@ export const BottomSheetPlayer = () => {
       </View>
 
       <View style={styles.controls}>
-        <Pressable onPress={handlePrev}>
-          <CustomIcon name="Prev" size={28} />
-        </Pressable>
+        <TouchableOpacity onPress={handlePrev} style={styles.mute}>
+          <CustomIcon name="UnMute" size={30} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handlePrev}>
+          <CustomIcon name="Prev" size={30} />
+        </TouchableOpacity>
 
-        <Pressable style={styles.playButton} onPress={togglePlayPause}>
-          <CustomIcon name={isPlaying ? "Pause" : "Play"} size={32} color="white" />
-        </Pressable>
+        <TouchableOpacity style={styles.playButton} onPress={togglePlayPause}>
+          <CustomIcon name={isPlaying ? "Pause" : "Play"} size={35} color="white" />
+        </TouchableOpacity>
 
-        <Pressable onPress={handleNext}>
-          <CustomIcon name="Next" size={28} />
-        </Pressable>
-      </View>
-
-      <View style={styles.volumeRow}>
-        <CustomIcon name="volume-1" size={20} />
-        <Slider
-          style={{ flex: 1 }}
-          value={0.2}
-          minimumValue={0}
-          maximumValue={1}
-          onValueChange={() => {}}
-          minimumTrackTintColor="#1DB954"
-          maximumTrackTintColor="#999"
-          thumbTintColor="#1DB954"
-        />
-        <CustomIcon name="volume-2" size={20} />
+        <TouchableOpacity onPress={handleNext}>
+          <CustomIcon name="Next" size={30} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleShuffle} style={styles.shuffle}>
+          <CustomIcon name="Shuffle" size={30} />
+        </TouchableOpacity>
       </View>
     </ThemedView>
   );
@@ -96,6 +87,12 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "gray",
     borderRadius: 10
+  },
+  shuffle: {
+    marginLeft: "auto"
+  },
+  mute: {
+    marginRight: "auto"
   },
   title: {
     fontSize: 20,
