@@ -25,7 +25,7 @@ export function useAudioPlayer() {
       return;
     }
 
-    audioManager.loadAudio({ id: track.id, audioUrl: track.url }).then(() => {
+    audioManager.loadLocalAudio({ id: track.id, audioUrl: track.url }).then(() => {
       audioManager.play().then(response => {
         set({ currentTrack: track, isPlaying: true, duration: response?.duration });
       });

@@ -1,3 +1,4 @@
+import { Asset } from "expo-asset";
 import { Platform } from "react-native";
 import { AudioBufferSourceNode, AudioContext, GainNode } from "react-native-audio-api";
 import { ICurrentAudioBuffer, ILoadAudio } from "./audio.types";
@@ -66,12 +67,41 @@ class AudioManager {
         }
       });
   }
+  async loadLocalAudio({ id, audioUrl }: ILoadAudio) {
+    //if already buffer with given id exists, we dont fetch the audio we just reuse the buffer
+    const savedBuffer = this.checkIfBufferExists({ id, audioUrl });
+    if (savedBuffer) {
+      this.audioBuffer = savedBuffer;
+      this.resumeTime = 0;
+      return;
+    }
+    const audioContext = this.getAudioContext();
+    await Asset.fromModule(audioUrl)
+      .downloadAsync()
+      .then(asset => {
+        if (!asset.localUri) {
+          throw new Error("failed to load audio asset");
+        }
+        return asset.localUri;
+      })
+      .then(arrayBuffer => audioContext?.decodeAudioData(arrayBuffer))
+      .then(buffer => {
+        if (buffer) {
+          this.audioBuffer = { id, buffer };
+          //saving current buffer to the list to mock caching
+          this.resumeTime = 0;
+          this.audioBufferList[id] = { id, buffer };
+        }
+      });
+  }
 
-  async play() {
+  async play(seekTime?: number) {
     if (this.isPlaying) {
       this.stop();
       this.isPlaying = false;
-      this.resumeTime = 0;
+      if (seekTime) {
+        this.resumeTime = seekTime;
+      }
     }
     const audioContext = this.getAudioContext();
     //checking if context is suspended
@@ -87,10 +117,16 @@ class AudioManager {
         this.source.connect(this.gainNode).connect(audioContext?.destination);
         this.startTime = audioContext.currentTime - this.resumeTime;
         this.source.start(0, this.resumeTime);
+        this.resumeTime = 0;
         // this.source.loop = true;
       }
-      this.source.onEnded = () => {
-        if (this.isManualStop) return;
+      this.source.onEnded = event => {
+        console.log("event", event);
+        console.log("this.isManualStop", this.isManualStop);
+        if (this.isManualStop) {
+          this.isManualStop = false;
+          return;
+        }
         this.isManualStop = false;
         this.isPlaying = false;
         this.audioEndedListener?.();
@@ -161,6 +197,9 @@ class AudioManager {
     return {
       isPlaying: this.isPlaying
     };
+  }
+  async seek(seekTime: number) {
+    this.play(seekTime);
   }
 }
 
