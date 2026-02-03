@@ -1,7 +1,8 @@
 import { ITrack } from "@/audio/audio.types";
 import { audioManager } from "@/audio/audioManager";
 import { useGetCurrentTrack, useGetIsPlaying, usePlayerStore } from "@/store/audioStore";
-import { useQueueNext, useQueuePrev } from "@/store/queue-store";
+import { useGetCurrentQueue, useQueueNext, useQueuePrev, useSetQueue } from "@/store/queue-store";
+import { shuffleTracks } from "@/utils/shuffleTracks";
 import { useCallback } from "react";
 
 export function useAudioPlayer() {
@@ -10,6 +11,8 @@ export function useAudioPlayer() {
   const currentTrack = useGetCurrentTrack();
   const next = useQueueNext();
   const prev = useQueuePrev();
+  const setQueue = useSetQueue();
+  const currentQueue = useGetCurrentQueue();
 
   const playTrack = (track: ITrack) => {
     if (track.id === currentTrack?.id) {
@@ -21,7 +24,8 @@ export function useAudioPlayer() {
       }
       return;
     }
-    audioManager.loadAudio({ id: track.id, audioUrl: track.url }).then(() => {
+
+    audioManager.loadLocalAudio({ id: track.id, audioUrl: track.url }).then(() => {
       audioManager.play().then(response => {
         set({ currentTrack: track, isPlaying: true, duration: response?.duration });
       });
@@ -65,6 +69,10 @@ export function useAudioPlayer() {
       playTrack(prevTrack);
     }
   };
+  const handleShuffle = () => {
+    setQueue(shuffleTracks(currentQueue));
+    handleNext();
+  };
 
-  return { playTrack, pauseTrack, togglePlayPause, resumeTrack, handleNext, handlePrev, closeIsPlaying };
+  return { playTrack, pauseTrack, togglePlayPause, resumeTrack, handleNext, handlePrev, closeIsPlaying, handleShuffle };
 }
