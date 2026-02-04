@@ -73,6 +73,20 @@ export function useAudioPlayer() {
     setQueue(shuffleTracks(currentQueue));
     handleNext();
   };
+  const toggleMute = () => {
+    const isMuted = audioManager.toggleMute();
+    set({ isMuted });
+  };
 
-  return { playTrack, pauseTrack, togglePlayPause, resumeTrack, handleNext, handlePrev, closeIsPlaying, handleShuffle };
+  return {
+    playTrack,
+    pauseTrack,
+    togglePlayPause,
+    resumeTrack,
+    handleNext,
+    handlePrev,
+    closeIsPlaying,
+    handleShuffle,
+    toggleMute
+  };
 }

@@ -1,6 +1,6 @@
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useSeekMusic } from "@/hooks/use-seek-music";
-import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
+import { useGetCurrentTrack, useGetIsMuted, useGetIsPlaying } from "@/store/audioStore";
 import Slider from "@react-native-community/slider";
 import React from "react";
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -32,9 +32,7 @@ export const BottomSheetPlayer = () => {
       <Seeker />
 
       <View style={styles.controls}>
-        <TouchableOpacity onPress={handlePrev} style={styles.mute}>
-          <CustomIcon name="UnMute" size={30} />
-        </TouchableOpacity>
+        <Muter />
         <TouchableOpacity onPress={handlePrev}>
           <CustomIcon name="Prev" size={30} />
         </TouchableOpacity>
@@ -79,6 +77,16 @@ function Seeker() {
         <ThemedText style={styles.time}>{formatTime(duration)}</ThemedText>
       </View>
     </>
+  );
+}
+
+function Muter() {
+  const { toggleMute } = useAudioPlayer();
+  const isMuted = useGetIsMuted();
+  return (
+    <TouchableOpacity onPress={toggleMute} style={styles.mute}>
+      <CustomIcon name={isMuted ? "Mute" : "UnMute"} size={30} />
+    </TouchableOpacity>
   );
 }
 const styles = StyleSheet.create({

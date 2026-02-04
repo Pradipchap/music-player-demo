@@ -1,11 +1,12 @@
 import { audioManager } from "@/audio/audioManager";
-import { useGetCurrentTrack } from "@/store/audioStore";
+import { useGetCurrentTrack, useSetPlayer } from "@/store/audioStore";
 import { useEffect, useState } from "react";
 
 export const useSeekMusic = () => {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const currentTrack = useGetCurrentTrack();
+  const setPlayer = useSetPlayer();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -22,6 +23,7 @@ export const useSeekMusic = () => {
 
   const onSeek = (time: number) => {
     audioManager.seek(time);
+    setPlayer({ isPlaying: true });
   };
 
   return { duration, currentTime, currentTrack, onSeek };

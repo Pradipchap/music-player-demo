@@ -201,6 +201,18 @@ class AudioManager {
   async seek(seekTime: number) {
     this.play(seekTime);
   }
+  toggleMute() {
+    //return true if muted and false if unmuted
+    if (this.gainNode) {
+      if (this.gainNode.gain.value === 0) {
+        this.gainNode.gain.value = 1;
+        return false;
+      } else {
+        this.gainNode.gain.value = 0;
+        return true;
+      }
+    }
+  }
 }
 
 export const audioManager = AudioManager.getInstance();

@@ -8,6 +8,7 @@ interface PlayerState {
   duration: number;
   currentTrack: ITrack | null;
   repeatMode: REPEAT_MODE;
+  isMuted: boolean;
   set: (v: Partial<PlayerState>) => void;
 }
 
@@ -16,6 +17,7 @@ export const usePlayerStore = create<PlayerState>(set => ({
   position: 0,
   duration: 0,
   currentTrack: null,
+  isMuted: false,
   repeatMode: REPEAT_MODE.QUEUE_LOOP,
   set: v => set(v)
 }));
@@ -26,3 +28,4 @@ export const useGetIsPlaying = () => usePlayerStore(state => state.isPlaying);
 export const useGetPosition = () => usePlayerStore(state => state.position);
 export const useGetDuration = () => usePlayerStore(state => state.duration);
 export const useGetRepeatMode = () => usePlayerStore(state => state.repeatMode);
+export const useGetIsMuted = () => usePlayerStore(state => state.isMuted);
