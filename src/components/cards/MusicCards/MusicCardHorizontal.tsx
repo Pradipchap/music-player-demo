@@ -10,7 +10,7 @@ interface MusicCardProps extends ITrack {
   onPress?: () => void;
 }
 
-export const MusicCard: React.FC<MusicCardProps> = ({ title, artist, thumbnail, isPlaying = false, onPress }) => {
+export const MusicCard: React.FC<MusicCardProps> = ({ title, artist, thumbnail = "example", isPlaying = false, onPress }) => {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.container, pressed && { opacity: 0.85 }]}>
       <ThemedView style={styles.imageWrapper}>

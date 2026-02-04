@@ -1,16 +1,18 @@
 import { Asset } from "expo-asset";
 import { Platform } from "react-native";
-import { AudioBufferSourceNode, AudioContext, GainNode } from "react-native-audio-api";
-import { ICurrentAudioBuffer, ILoadAudio } from "./audio.types";
+import { AudioBufferSourceNode, AudioContext, GainNode, PlaybackNotificationManager, StreamerNode } from "react-native-audio-api";
+import { ICurrentAudioBuffer, ITrack } from "./audio.types";
 
 class AudioManager {
   private static instance: AudioManager;
   private audioCtx: AudioContext | null = null;
   private audioBuffer: ICurrentAudioBuffer | null = null;
+  private currentStreamingAudio: ITrack | null = null;
   private audioBufferList: Record<string, ICurrentAudioBuffer> = {};
   private isPlaying = false;
   private gainNode: GainNode | null = null;
   private source?: AudioBufferSourceNode = undefined;
+  private streamer?: StreamerNode;
 
   private isManualStop = false;
 
@@ -39,23 +41,23 @@ class AudioManager {
     return AudioManager.instance;
   }
 
-  checkIfBufferExists({ id }: ILoadAudio) {
+  checkIfBufferExists({ id }: Omit<ITrack, "filename" | "size" | "thumbnail" | "title" | "artist">) {
     if (this.audioBufferList[id]) {
       return this.audioBufferList[id];
     }
     return null;
   }
 
-  async loadAudio({ id, audioUrl }: ILoadAudio) {
+  async loadAudio({ id, url }: ITrack) {
     //if already buffer with given id exists, we dont fetch the audio we just reuse the buffer
-    const savedBuffer = this.checkIfBufferExists({ id, audioUrl });
+    const savedBuffer = this.checkIfBufferExists({ id, url });
     if (savedBuffer) {
       this.audioBuffer = savedBuffer;
       this.resumeTime = 0;
       return;
     }
     const audioContext = this.getAudioContext();
-    await fetch(audioUrl)
+    await fetch(url)
       .then(response => response.arrayBuffer())
       .then(arrayBuffer => audioContext?.decodeAudioData(arrayBuffer))
       .then(buffer => {
@@ -67,16 +69,16 @@ class AudioManager {
         }
       });
   }
-  async loadLocalAudio({ id, audioUrl }: ILoadAudio) {
+  async loadLocalAudio({ id, url }: ITrack) {
     //if already buffer with given id exists, we dont fetch the audio we just reuse the buffer
-    const savedBuffer = this.checkIfBufferExists({ id, audioUrl });
+    const savedBuffer = this.checkIfBufferExists({ id, url });
     if (savedBuffer) {
       this.audioBuffer = savedBuffer;
       this.resumeTime = 0;
       return;
     }
     const audioContext = this.getAudioContext();
-    await Asset.fromModule(audioUrl)
+    await Asset.fromModule(url)
       .downloadAsync()
       .then(asset => {
         if (!asset.localUri) {
@@ -93,6 +95,55 @@ class AudioManager {
           this.audioBufferList[id] = { id, buffer };
         }
       });
+  }
+
+  loadStreamingAudio(track: ITrack) {
+    this.currentStreamingAudio = track;
+    this.resumeTime = 0;
+  }
+  async playStreamingAudio(seekTime?: number) {
+    if (this.isPlaying) {
+      this.stop();
+      this.isPlaying = false;
+      if (seekTime) {
+        this.resumeTime = seekTime;
+      }
+    }
+    const audioContext = this.getAudioContext();
+    //checking if context is suspended
+    if (audioContext?.state === "suspended") {
+      audioContext.resume();
+    }
+    this.streamer = audioContext?.createStreamer();
+    if (this.streamer && this.currentStreamingAudio) {
+      if (audioContext?.destination && this.gainNode) {
+        console.log("this.currentStreamingAudio.url", this.currentStreamingAudio?.url);
+        const isWorking = this.streamer.initialize(this.currentStreamingAudio.url);
+        // if (isWorking) {
+        this.streamer.connect(this.gainNode).connect(audioContext?.destination);
+        this.startTime = audioContext.currentTime - this.resumeTime;
+        this.streamer.start(this.resumeTime);
+        await PlaybackNotificationManager.show(this.currentStreamingAudio);
+        const x = await PlaybackNotificationManager.isActive();
+        console.log("x", x);
+        // }
+        this.resumeTime = 0;
+      }
+      this.streamer.onEnded = event => {
+        if (this.isManualStop) {
+          this.isManualStop = false;
+          return;
+        }
+        this.isManualStop = false;
+        this.isPlaying = false;
+        this.audioEndedListener?.();
+      };
+    }
+
+    this.isPlaying = true;
+    console.log("this.duration", this.getDuration());
+
+    return { duration: this.getDuration() };
   }
 
   async play(seekTime?: number) {
@@ -141,16 +192,19 @@ class AudioManager {
   stop() {
     this.isManualStop = true;
     this.source?.stop();
+    this.streamer?.stop();
   }
   autoStop() {
     this.isManualStop = false;
     this.source?.stop();
+    this.streamer?.stop();
   }
 
   pause = () => {
     if (!this.isPlaying || !this.audioCtx) return;
     this.isManualStop = true;
     this.source?.stop();
+    this.streamer?.stop();
     this.resumeTime = this.audioCtx.currentTime - this.startTime;
     this.isPlaying = false;
   };

@@ -2,9 +2,11 @@ import { AudioBuffer } from "react-native-audio-api";
 
 export interface ITrack {
   id: string;
+  title: string;
+  filename: string;
+  size: number;
+  artist: string;
   url: string;
-  title?: string;
-  artist?: string;
   thumbnail: string;
 }
 export interface ILoadAudio {
