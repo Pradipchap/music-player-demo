@@ -19,17 +19,15 @@ export function useAudioPlayer() {
       if (isPlaying) {
         pauseTrack();
       } else {
-        audioManager.play();
+        audioManager.playStreamingAudio();
         set({ isPlaying: true });
       }
       return;
     }
 
-    audioManager.loadLocalAudio({ id: track.id, audioUrl: track.url }).then(() => {
-      audioManager.play().then(response => {
-        set({ currentTrack: track, isPlaying: true, duration: response?.duration });
-      });
-    });
+    audioManager.loadStreamingAudio(track);
+    const duration = audioManager.playStreamingAudio();
+    set({ currentTrack: track, isPlaying: true, duration: duration.duration });
   };
 
   const closeIsPlaying = useCallback(() => {
@@ -42,7 +40,7 @@ export function useAudioPlayer() {
   };
 
   const resumeTrack = useCallback(() => {
-    audioManager.play();
+    audioManager.playStreamingAudio();
     set({ isPlaying: true });
   }, []);
 
