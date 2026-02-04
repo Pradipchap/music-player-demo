@@ -3,7 +3,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
-import { demoPlaylist } from "@/services/audioLibrary";
+import { pinkFloydTracks } from "@/services/audioLibrary";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
 import { useSetQueue } from "@/store/queue-store";
 import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
@@ -16,7 +16,7 @@ export default function HomeScreen() {
   const add = useSetQueue();
 
   const addAllToQueue = () => {
-    add(demoPlaylist.slice(1, 4));
+    add(pinkFloydTracks.slice(1, 4));
   };
 
   return (
@@ -27,7 +27,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={demoPlaylist}
+          data={pinkFloydTracks}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <MusicCard isPlaying={isPlaying && currentTrack?.id === item.id} onPress={() => playTrack(item)} {...item} />

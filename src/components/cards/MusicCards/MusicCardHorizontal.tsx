@@ -3,8 +3,8 @@ import CustomIcon from "@/components/Icon";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import React from "react";
-import { Image, Pressable, StyleSheet, View } from "react-native";
 
+import { Image, Pressable, StyleSheet, View } from "react-native";
 interface MusicCardProps extends ITrack {
   isPlaying?: boolean;
   onPress?: () => void;
@@ -14,7 +14,7 @@ export const MusicCard: React.FC<MusicCardProps> = ({ title, artist, thumbnail, 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.container, pressed && { opacity: 0.85 }]}>
       <ThemedView style={styles.imageWrapper}>
-        <Image source={{ uri: thumbnail }} style={styles.image} />
+        <Image source={{ uri: thumbnail }} height={100} width={100} style={styles.image} />
       </ThemedView>
 
       <ThemedView style={styles.info}>
@@ -49,13 +49,12 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 8,
-    overflow: "hidden",
-    backgroundColor: "#222"
+    overflow: "hidden"
   },
 
   image: {
-    width: "100%",
-    height: "100%"
+    width: 100,
+    height: 100
   },
 
   info: {
