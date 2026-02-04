@@ -16,7 +16,7 @@ export default function HomeScreen() {
   const add = useSetQueue();
 
   const addAllToQueue = () => {
-    add(pinkFloydTracks.slice(1, 4));
+    add(pinkFloydTracks);
   };
 
   return (

@@ -92,6 +92,9 @@ class AudioManager {
           this.resumeTime = 0;
           this.audioBufferList[id] = { id, buffer };
         }
+      })
+      .catch(error => {
+        console.log("error is ", error);
       });
   }
 
@@ -99,9 +102,9 @@ class AudioManager {
     if (this.isPlaying) {
       this.stop();
       this.isPlaying = false;
-      if (seekTime) {
-        this.resumeTime = seekTime;
-      }
+    }
+    if (seekTime) {
+      this.resumeTime = seekTime;
     }
     const audioContext = this.getAudioContext();
     //checking if context is suspended
