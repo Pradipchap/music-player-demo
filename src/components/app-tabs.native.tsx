@@ -13,6 +13,7 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
+      hidden
       minimizeBehavior="onScrollDown"
       backgroundColor={colors.background}
       indicatorColor={colors.backgroundElement}
@@ -27,29 +28,6 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/home.png")} />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="search">
-        <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/search.png")} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="library">
-        <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/album.png")} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="account">
-        <NativeTabs.Trigger.Label>Account</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/user.png")} />
-      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
-
-const BottomAccessory = () => {
-  const currentTrack = useGetCurrentTrack();
-  if (!currentTrack) return null;
-
-  return (
-    <NativeTabs.BottomAccessory>
-      <MiniPlayer />
-    </NativeTabs.BottomAccessory>
-  );
-};
