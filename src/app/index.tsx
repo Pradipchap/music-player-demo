@@ -1,7 +1,7 @@
 import { MusicCard } from "@/components/cards/MusicCards/MusicCardHorizontal";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { pinkFloydTracks } from "@/services/audioLibrary";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
@@ -47,11 +47,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: "center",
     justifyContent: "center",
     gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
     maxWidth: MaxContentWidth
   },
   heroSection: {

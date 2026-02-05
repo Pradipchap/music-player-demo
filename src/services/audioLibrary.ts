@@ -28,7 +28,7 @@ import track24 from "@/assets/musics/24.flac";
 import track25 from "@/assets/musics/25.flac";
 
 // cover
-import cover from "../../assets/images/cover.jpg";
+const cover = require("@/assets/images/cover.jpg");
 
 export const pinkFloydTracks: ITrack[] = [
   { id: "01", url: track01, title: "In the Flesh?", artist: "Pink Floyd", thumbnail: cover },
