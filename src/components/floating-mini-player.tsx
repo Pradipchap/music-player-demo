@@ -1,3 +1,4 @@
+import { isIOS } from "@/constants/misc";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useSeekMusic } from "@/hooks/use-seek-music";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
@@ -5,7 +6,7 @@ import { useBottomPlayerSheetStore } from "@/store/player-bottom-sheet-store";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef } from "react";
-import { Animated, Dimensions, Easing, Image, ImageSourcePropType, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Dimensions, Easing, Image, ImageSourcePropType, Pressable, StyleSheet, View } from "react-native";
 import { BottomSheetPlayer } from "./bottom-sheet-player";
 import CustomIcon from "./Icon";
 import { ThemedText } from "./themed-text";
@@ -128,7 +129,8 @@ export const MiniPlayer = () => {
         {
           transform: [{ translateY: slideInterpolate }],
           opacity: slideAnim
-        }
+        },
+        isIOS ? {} : { ...styles.androidPosition }
       ]}
     >
       <Pressable onPress={onMiniPlayerPress} style={({ pressed }) => [styles.container, pressed && styles.pressed]}>
@@ -160,9 +162,13 @@ export const MiniPlayer = () => {
             <ThemedText numberOfLines={1} style={styles.title}>
               {title}
             </ThemedText>
-            <ThemedText numberOfLines={1} style={styles.artist}>
-              {artist}
-            </ThemedText>
+            {!isIOS ? (
+              <ThemedText numberOfLines={1} style={styles.artist}>
+                {artist}
+              </ThemedText>
+            ) : (
+              false
+            )}
           </View>
           <ProgressFill />
         </View>
@@ -173,7 +179,7 @@ export const MiniPlayer = () => {
             style={({ pressed }) => [styles.controlButton, pressed && styles.buttonPressed]}
             hitSlop={10}
           >
-            <CustomIcon name="Prev" size={24} color="#1a1a1a" />
+            <CustomIcon name="Prev" size={22} color="#1a1a1a" />
           </Pressable>
 
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
@@ -182,7 +188,7 @@ export const MiniPlayer = () => {
               style={({ pressed }) => [styles.playButton, isPlaying && styles.pauseButton, pressed && styles.buttonPressed]}
               hitSlop={10}
             >
-              <Ionicons name={isPlaying ? "pause" : "play"} size={isPlaying ? 20 : 22} color="white" />
+              <Ionicons name={isPlaying ? "pause" : "play"} size={isPlaying ? 18 : 20} color="white" />
             </Pressable>
           </Animated.View>
 
@@ -191,16 +197,9 @@ export const MiniPlayer = () => {
             style={({ pressed }) => [styles.controlButton, pressed && styles.buttonPressed]}
             hitSlop={10}
           >
-            <CustomIcon name="Next" size={24} color="#1a1a1a" />
+            <CustomIcon name="Next" size={22} color="#1a1a1a" />
           </Pressable>
         </Animated.View>
-        <View style={styles.expandIndicator}>
-          <View style={styles.dots}>
-            <View style={[styles.dot, styles.dot1]} />
-            <View style={[styles.dot, styles.dot2]} />
-            <View style={[styles.dot, styles.dot3]} />
-          </View>
-        </View>
       </Pressable>
     </Animated.View>
   );
@@ -222,8 +221,6 @@ const ProgressFill = () => {
 
 const styles = StyleSheet.create({
   shadowContainer: {
-    position: "absolute",
-    bottom: Platform.OS === "ios" ? 100 : 90,
     alignSelf: "center",
     width: SCREEN_WIDTH - 32,
     shadowColor: "#000",
@@ -235,15 +232,18 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 10
   },
+  androidPosition: {
+    position: "absolute",
+    bottom: 70
+  },
 
   container: {
     width: "100%",
-    height: 72,
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    // paddingVertical: 12,
     overflow: "hidden",
     position: "relative"
   },
@@ -265,21 +265,22 @@ const styles = StyleSheet.create({
   albumWrapper: {
     width: 48,
     height: 48,
-    borderRadius: 10,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4
     },
+    borderRadius: 200,
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4
+    elevation: 4,
+    padding: 1
   },
 
   thumbnail: {
-    width: "100%",
-    height: "100%"
+    height: "100%",
+    width: "100%"
   },
 
   vinylRing: {
@@ -381,8 +382,8 @@ const styles = StyleSheet.create({
   },
 
   controlButton: {
-    width: 36,
-    height: 36,
+    width: 30,
+    height: 30,
     borderRadius: 18,
     backgroundColor: "rgba(0, 0, 0, 0.05)",
     alignItems: "center",

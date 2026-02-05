@@ -21,7 +21,7 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right", "top"]}>
         <TouchableOpacity onPress={addAllToQueue}>
           <ThemedText>add all to queue</ThemedText>
         </TouchableOpacity>
