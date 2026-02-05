@@ -1,6 +1,6 @@
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useSeekMusic } from "@/hooks/use-seek-music";
-import { useGetCurrentTrack, useGetIsMuted, useGetIsPlaying } from "@/store/audioStore";
+import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
 import Slider from "@react-native-community/slider";
 import React, { useEffect, useState } from "react";
 import { Animated, Dimensions, Easing, ImageSourcePropType, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -122,8 +122,6 @@ export const BottomSheetPlayer = () => {
           <CustomIcon name="Repeat" size={24} color="#666" />
         </TouchableOpacity>
       </View>
-
-      <VolumeControl />
     </ThemedView>
   );
 };
@@ -177,36 +175,6 @@ function Seeker() {
           <View key={percent} style={[styles.progressDot, progressPercentage >= percent && styles.progressDotActive]} />
         ))}
       </View>
-    </View>
-  );
-}
-
-function VolumeControl() {
-  const { toggleMute } = useAudioPlayer();
-  const isMuted = useGetIsMuted();
-  const [volume, setVolume] = useState(0.7);
-
-  return (
-    <View style={styles.volumeContainer}>
-      <TouchableOpacity onPress={toggleMute} style={styles.volumeButton}>
-        <CustomIcon
-          name={isMuted ? "Mute" : volume > 0.5 ? "VolumeHigh" : "VolumeLow"}
-          size={22}
-          color={isMuted ? "#FF3B30" : "#666"}
-        />
-      </TouchableOpacity>
-
-      <Slider
-        style={styles.volumeSlider}
-        value={isMuted ? 0 : volume}
-        minimumValue={0}
-        maximumValue={1}
-        onValueChange={setVolume}
-        minimumTrackTintColor="#1DB954"
-        maximumTrackTintColor="#e0e0e0"
-        thumbTintColor="#1DB954"
-        // thumbStyle={styles.volumeThumb}
-      />
     </View>
   );
 }
