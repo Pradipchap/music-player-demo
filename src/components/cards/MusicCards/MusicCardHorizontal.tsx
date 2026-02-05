@@ -4,15 +4,24 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 
 import React from "react";
-import { Animated, Image, ImageSourcePropType, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Image, ImageSourcePropType, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface MusicCardProps extends ITrack {
   isPlaying?: boolean;
   onPress?: () => void;
+  onActionPress: () => void;
   index?: number;
 }
 
-export const MusicCard: React.FC<MusicCardProps> = ({ title, artist, thumbnail, isPlaying = false, onPress, index = 0 }) => {
+export const MusicCard: React.FC<MusicCardProps> = ({
+  title,
+  artist,
+  thumbnail,
+  onActionPress,
+  isPlaying = false,
+  onPress,
+  index = 0
+}) => {
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const rotateAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -65,7 +74,7 @@ export const MusicCard: React.FC<MusicCardProps> = ({ title, artist, thumbnail, 
       ]}
     >
       <Pressable
-        onPress={onPress}
+        onPress={onActionPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         style={({ pressed }) => [styles.container, pressed && styles.pressed]}
@@ -98,15 +107,17 @@ export const MusicCard: React.FC<MusicCardProps> = ({ title, artist, thumbnail, 
           </View>
         </View>
 
-        <Animated.View style={[styles.actionButton, isPlaying && styles.playingButton]}>
-          <CustomIcon name={isPlaying ? "Pause" : "Play"} size={20} color={"white"} />
+        <TouchableOpacity onPress={onPress}>
+          <Animated.View style={[styles.actionButton, isPlaying && styles.playingButton]}>
+            <CustomIcon name={isPlaying ? "Pause" : "Play"} size={20} color={"white"} />
 
-          {isPlaying && (
-            <View style={styles.rippleEffect}>
-              <View style={styles.rippleCircle} />
-            </View>
-          )}
-        </Animated.View>
+            {isPlaying && (
+              <View style={styles.rippleEffect}>
+                <View style={styles.rippleCircle} />
+              </View>
+            )}
+          </Animated.View>
+        </TouchableOpacity>
 
         <View style={styles.gradientOverlay} />
       </Pressable>
