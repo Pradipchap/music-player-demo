@@ -15,6 +15,8 @@ export default function CustomIcon({ name, color, size, style, ...rest }: IconPr
   const defaultSize = size || 24;
 
   switch (name) {
+    case "Repeat":
+      return <Feather name="repeat" {...rest} style={style} color={defaultColor} size={defaultSize} />;
     case "Shuffle":
       return <Ionicons name="shuffle" {...rest} style={style} color={defaultColor} size={defaultSize} />;
     case "UnMute":

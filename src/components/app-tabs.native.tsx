@@ -3,33 +3,30 @@ import React from "react";
 import { useColorScheme } from "react-native";
 
 import { Colors } from "@/constants/theme";
+import { useGetCurrentTrack } from "@/store/audioStore";
+import { MiniPlayer } from "./floating-mini-player";
 
 export default function AppTabs() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "unspecified" ? "light" : scheme];
+  const currentTrack = useGetCurrentTrack();
 
   return (
     <NativeTabs
+      hidden
+      minimizeBehavior="onScrollDown"
       backgroundColor={colors.background}
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}
     >
+      {currentTrack ? (
+        <NativeTabs.BottomAccessory>
+          <MiniPlayer />
+        </NativeTabs.BottomAccessory>
+      ) : null}
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/home.png")} />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="search">
-        <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/search.png")} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="library">
-        <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/album.png")} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="account">
-        <NativeTabs.Trigger.Label>Account</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/user.png")} />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
