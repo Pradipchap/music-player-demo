@@ -3,10 +3,12 @@ import { useGetRepeatMode } from "@/store/audioStore";
 import { REPEAT_MODE } from "@/types";
 import { useCallback, useEffect } from "react";
 import { useAudioPlayer } from "./use-audio-player";
+import { useAutoLoadNextTrack } from "./use-auto-load-next-track";
 
 export const useHandleQueue = () => {
   const repeatMode = useGetRepeatMode();
   const { resumeTrack, handleNext, closeIsPlaying } = useAudioPlayer();
+  useAutoLoadNextTrack();
 
   const onAudioEnd = useCallback(() => {
     closeIsPlaying();

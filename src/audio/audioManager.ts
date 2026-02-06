@@ -67,6 +67,28 @@ class AudioManager {
         }
       });
   }
+  async preloadAudio({ id, audioUrl }: ILoadAudio) {
+    if (!this.checkIfBufferExists({ id, audioUrl })) {
+      const audioContext = this.getAudioContext();
+      await Asset.fromModule(audioUrl)
+        .downloadAsync()
+        .then(asset => {
+          if (!asset.localUri) {
+            throw new Error("failed to load audio asset");
+          }
+          return asset.localUri;
+        })
+        .then(arrayBuffer => audioContext?.decodeAudioData(arrayBuffer))
+        .then(buffer => {
+          if (buffer) {
+            this.audioBufferList[id] = { id, buffer };
+          }
+        })
+        .catch(error => {
+          console.log("error while preloading:", error);
+        });
+    }
+  }
   async loadLocalAudio({ id, audioUrl }: ILoadAudio) {
     //if already buffer with given id exists, we dont fetch the audio we just reuse the buffer
     const savedBuffer = this.checkIfBufferExists({ id, audioUrl });
