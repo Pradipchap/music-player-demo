@@ -6,23 +6,28 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { useHandleRepeatMode } from "@/hooks/use-handle-repeat-mode";
+import { usePreLoadAllTracks } from "@/hooks/use-preload-all-tracks";
 import { pinkFloydTracks } from "@/services/audioLibrary";
 import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
 import { useBottomPlayerSheetStore } from "@/store/player-bottom-sheet-store";
 import { useInsertLast, useInsertNext, useSetQueue } from "@/store/queue-store";
-import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { REPEAT_MODE } from "@/types";
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function HomeScreen() {
+export function MainScreen() {
   const { setShowPlayerSheet } = useBottomPlayerSheetStore();
   const { playTrack } = useAudioPlayer();
   const isPlaying = useGetIsPlaying();
   const currentTrack = useGetCurrentTrack();
   const add = useSetQueue();
+
   const insertNext = useInsertNext();
   const insertLast = useInsertLast();
-
+  const { changeRepeatMode } = useHandleRepeatMode();
   const addAllToQueue = () => {
+    changeRepeatMode(REPEAT_MODE.QUEUE_LOOP);
     add(pinkFloydTracks);
   };
 
@@ -73,6 +78,21 @@ export default function HomeScreen() {
       </SafeAreaView>
     </ThemedView>
   );
+}
+
+export default function HomeScreen() {
+  const { isLoading } = usePreLoadAllTracks();
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.safeArea} edges={["left", "right", "top"]}>
+          <ThemedText>Loading tracks. Please wait</ThemedText>
+          <ActivityIndicator />
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
+  return <MainScreen />;
 }
 
 const styles = StyleSheet.create({

@@ -62,6 +62,15 @@ export function useAudioPlayer() {
       playTrack(nextTrack);
     }
   };
+  const handleAutoNext = () => {
+    const nextTrack = next();
+
+    if (nextTrack) {
+      set({ currentTrack: nextTrack, isPlaying: true, duration: audioManager.getDuration() });
+    } else {
+      resumeTrack();
+    }
+  };
 
   const handlePrev = () => {
     const prevTrack = prev();
@@ -87,6 +96,7 @@ export function useAudioPlayer() {
     handlePrev,
     closeIsPlaying,
     handleShuffle,
-    toggleMute
+    toggleMute,
+    handleAutoNext
   };
 }

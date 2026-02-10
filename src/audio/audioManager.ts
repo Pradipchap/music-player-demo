@@ -1,3 +1,4 @@
+import { REPEAT_MODE } from "@/types";
 import { Asset } from "expo-asset";
 import { Platform } from "react-native";
 import { AudioBufferSourceNode, AudioContext, GainNode } from "react-native-audio-api";
@@ -7,16 +8,21 @@ class AudioManager {
   private static instance: AudioManager;
   private audioCtx: AudioContext | null = null;
   private audioBuffer: ICurrentAudioBuffer | null = null;
+  private nextAudioBuffer: ICurrentAudioBuffer | null = null;
   private audioBufferList: Record<string, ICurrentAudioBuffer> = {};
   private isPlaying = false;
   private gainNode: GainNode | null = null;
   private source?: AudioBufferSourceNode = undefined;
+  private nextSource?: AudioBufferSourceNode;
+
+  private repeatMode: REPEAT_MODE = REPEAT_MODE.TRACK_LOOP;
 
   private isManualStop = false;
 
   audioEndedListener?: () => void;
 
   private startTime = 0;
+
   private resumeTime = 0;
 
   getAudioContext() {
@@ -46,7 +52,7 @@ class AudioManager {
     return null;
   }
 
-  async loadAudio({ id, audioUrl }: ILoadAudio) {
+  async loadRemoteAudio({ id, audioUrl }: ILoadAudio) {
     //if already buffer with given id exists, we dont fetch the audio we just reuse the buffer
     const savedBuffer = this.checkIfBufferExists({ id, audioUrl });
     if (savedBuffer) {
@@ -67,35 +73,75 @@ class AudioManager {
         }
       });
   }
+  async preloadAudio({ id, audioUrl }: ILoadAudio) {
+    try {
+      if (this.checkIfBufferExists({ id, audioUrl })) {
+        return this.audioBufferList[id];
+      }
+
+      const audioContext = this.getAudioContext();
+      if (!audioContext) {
+        throw new Error("AudioContext not initialized");
+      }
+
+      const asset = Asset.fromModule(audioUrl);
+      await asset.downloadAsync();
+
+      if (!asset.localUri) {
+        throw new Error("Failed to load audio asset");
+      }
+
+      const buffer = await audioContext.decodeAudioData(asset.localUri);
+
+      //storing for future use
+      this.audioBufferList[id] = { id, buffer };
+
+      return { id, buffer };
+    } catch (error) {
+      console.log("error while preloading:", error);
+    }
+  }
+
+  async preloadNextAudio({ audioUrl, id }: ILoadAudio) {
+    const nextData = await this.preloadAudio({ audioUrl, id });
+    if (nextData) {
+      this.nextAudioBuffer = nextData;
+    }
+  }
+  async scheduleNextAudio() {
+    const audioContext = this.getAudioContext();
+    //checking if context is suspended
+    if (audioContext?.state === "suspended") {
+      audioContext.resume();
+    }
+    this.nextSource = await audioContext?.createBufferSource();
+    if (this.nextSource && this.nextAudioBuffer?.buffer) {
+      this.nextSource.buffer = this.nextAudioBuffer.buffer;
+
+      if (audioContext?.destination && this.gainNode) {
+        this.nextSource.connect(this.gainNode).connect(audioContext?.destination);
+        const nextStartTime = audioContext.currentTime + (this.getDuration() - this.getCurrentTime());
+        this.nextSource.start(nextStartTime, 0); // this.source.loop = true;
+        this.nextSource.onEnded = () => this.onEndCallBack();
+      }
+    }
+
+    this.isPlaying = true;
+
+    return { duration: this.getDuration() };
+  }
   async loadLocalAudio({ id, audioUrl }: ILoadAudio) {
-    //if already buffer with given id exists, we dont fetch the audio we just reuse the buffer
     const savedBuffer = this.checkIfBufferExists({ id, audioUrl });
     if (savedBuffer) {
       this.audioBuffer = savedBuffer;
       this.resumeTime = 0;
       return;
     }
-    const audioContext = this.getAudioContext();
-    await Asset.fromModule(audioUrl)
-      .downloadAsync()
-      .then(asset => {
-        if (!asset.localUri) {
-          throw new Error("failed to load audio asset");
-        }
-        return asset.localUri;
-      })
-      .then(arrayBuffer => audioContext?.decodeAudioData(arrayBuffer))
-      .then(buffer => {
-        if (buffer) {
-          this.audioBuffer = { id, buffer };
-          //saving current buffer to the list to mock caching
-          this.resumeTime = 0;
-          this.audioBufferList[id] = { id, buffer };
-        }
-      })
-      .catch(error => {
-        console.log("error is ", error);
-      });
+    const loadedData = await this.preloadAudio({ audioUrl, id });
+    if (loadedData) {
+      this.audioBuffer = loadedData;
+      this.resumeTime = 0;
+    }
   }
 
   async play(seekTime?: number) {
@@ -109,7 +155,6 @@ class AudioManager {
     const audioContext = this.getAudioContext();
     //checking if context is suspended
     if (audioContext?.state === "suspended") {
-      console.log("suspended");
       audioContext.resume();
     }
     this.source = await audioContext?.createBufferSource();
@@ -121,24 +166,32 @@ class AudioManager {
         this.startTime = audioContext.currentTime - this.resumeTime;
         this.source.start(0, this.resumeTime);
         this.resumeTime = 0;
-        // this.source.loop = true;
       }
-      this.source.onEnded = event => {
-        console.log("event", event);
-        console.log("this.isManualStop", this.isManualStop);
-        if (this.isManualStop) {
-          this.isManualStop = false;
-          return;
-        }
-        this.isManualStop = false;
-        this.isPlaying = false;
-        this.audioEndedListener?.();
-      };
+      this.source.onEnded = () => this.onEndCallBack();
     }
 
     this.isPlaying = true;
 
     return { duration: this.getDuration() };
+  }
+  onEndCallBack() {
+    const audioContext = this.getAudioContext();
+
+    if (this.isManualStop) {
+      this.isManualStop = false;
+      return;
+    }
+
+    //only handover the source and nextAudioBuffer if it exists so that track can repeat itself
+    //if nextAudioBuffer doesnot exists
+    if (this.nextAudioBuffer && this.nextSource && this.repeatMode === REPEAT_MODE.QUEUE_LOOP) {
+      this.audioBuffer = this.nextAudioBuffer;
+      this.source = this.nextSource;
+    }
+    this.startTime = audioContext.currentTime;
+    this.isManualStop = false;
+    this.isPlaying = true;
+    this.audioEndedListener?.();
   }
 
   stop() {
@@ -205,7 +258,7 @@ class AudioManager {
     this.play(seekTime);
   }
   toggleMute() {
-    //return true if muted and false if unmuted
+    //returning boolean to update mute state based on returned value
     if (this.gainNode) {
       if (this.gainNode.gain.value === 0) {
         this.gainNode.gain.value = 1;
@@ -215,6 +268,12 @@ class AudioManager {
         return true;
       }
     }
+  }
+  loopCurrentTrack() {
+    if (this.source) this.source.loop = true;
+  }
+  changeRepeatMode(repeatMode: REPEAT_MODE) {
+    this.repeatMode = repeatMode;
   }
 }
 

@@ -114,7 +114,14 @@ export const useInsertLast = () => useQueueStore(state => state.insertNext);
 export const useGetCurrentQueue = () => useQueueStore(state => state.queue);
 export const useSetQueue = () => useQueueStore(state => state.setQueue);
 export const useGetCurrentQueueTrack = () => useQueueStore(state => state.queue[state.index]);
-
+export const useGetNextQueueTrack = () =>
+  useQueueStore(state => {
+    if (state.index + 1 >= state.queue.length) {
+      return state.queue[0];
+    } else {
+      return state.queue[state.index + 1];
+    }
+  });
 const findTrackIndex = (queue: ITrack[], track: ITrack): number => {
   return queue.findIndex(t => t.id === track.id);
 };
