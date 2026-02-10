@@ -23,7 +23,9 @@ export const useAutoLoadNextTrack = () => {
 
     if (repeatMode === REPEAT_MODE.QUEUE_LOOP && percentageOfPlaying > 80) {
       hasPreloaded.current = getNextTrack.id;
-      audioManager.preloadAudio({ id: getNextTrack.id, audioUrl: getNextTrack.url });
+      audioManager.preloadNextAudio({ id: getNextTrack.id, audioUrl: getNextTrack.url }).then(() => {
+        audioManager.scheduleNextAudio();
+      });
     }
   }, [repeatMode, getNextTrack]);
 

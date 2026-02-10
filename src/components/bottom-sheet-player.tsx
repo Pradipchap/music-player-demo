@@ -1,6 +1,7 @@
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useSeekMusic } from "@/hooks/use-seek-music";
-import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
+import { useGetCurrentTrack, useGetIsPlaying, useGetRepeatMode, useToggleRepeatMode } from "@/store/audioStore";
+import { REPEAT_MODE } from "@/types";
 import Slider from "@react-native-community/slider";
 import React, { useEffect, useState } from "react";
 import { Animated, Dimensions, Easing, ImageSourcePropType, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -118,9 +119,7 @@ export const BottomSheetPlayer = () => {
           <CustomIcon name="Next" size={28} color="#1a1a1a" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.controlButton}>
-          <CustomIcon name="Repeat" size={24} color="#666" />
-        </TouchableOpacity>
+        <RepeatModeToggler />
       </View>
     </ThemedView>
   );
@@ -176,6 +175,17 @@ function Seeker() {
         ))}
       </View>
     </View>
+  );
+}
+
+function RepeatModeToggler() {
+  const repeatMode = useGetRepeatMode();
+  const toggleRepeatMode = useToggleRepeatMode();
+
+  return (
+    <TouchableOpacity style={styles.controlButton} onPress={toggleRepeatMode}>
+      <CustomIcon name="Repeat" size={24} color={repeatMode === REPEAT_MODE.TRACK_LOOP ? "#666" : "#1DB954"} />
+    </TouchableOpacity>
   );
 }
 
