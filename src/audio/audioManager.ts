@@ -107,7 +107,6 @@ class AudioManager {
     const audioContext = this.getAudioContext();
     //checking if context is suspended
     if (audioContext?.state === "suspended") {
-      console.log("suspended");
       audioContext.resume();
     }
     this.nextSource = await audioContext?.createBufferSource();
@@ -177,8 +176,13 @@ class AudioManager {
       this.isManualStop = false;
       return;
     }
-    this.audioBuffer = this.nextAudioBuffer;
-    this.source = this.nextSource;
+
+    //only handover the source and nextAudioBuffer if it exists so that track can repeat itself
+    //if nextAudioBuffer doesnot exists
+    if (this.nextAudioBuffer && this.source) {
+      this.audioBuffer = this.nextAudioBuffer;
+      this.source = this.nextSource;
+    }
     this.startTime = audioContext.currentTime;
     this.isManualStop = false;
     this.isPlaying = true;

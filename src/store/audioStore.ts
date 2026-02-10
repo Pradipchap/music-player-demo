@@ -11,6 +11,7 @@ interface PlayerState {
   isMuted: boolean;
   toggleRepeatMode: () => void;
   set: (v: Partial<PlayerState>) => void;
+  setRepeatMode: (v: REPEAT_MODE) => void;
 }
 
 export const usePlayerStore = create<PlayerState>(set => ({
@@ -19,7 +20,7 @@ export const usePlayerStore = create<PlayerState>(set => ({
   duration: 0,
   currentTrack: null,
   isMuted: false,
-  repeatMode: REPEAT_MODE.QUEUE_LOOP,
+  repeatMode: REPEAT_MODE.TRACK_LOOP,
   toggleRepeatMode: () =>
     set(state => {
       if (state.repeatMode === REPEAT_MODE.QUEUE_LOOP) {
@@ -28,6 +29,7 @@ export const usePlayerStore = create<PlayerState>(set => ({
         return { repeatMode: REPEAT_MODE.QUEUE_LOOP };
       }
     }),
+  setRepeatMode: (value: REPEAT_MODE) => set({ repeatMode: value }),
   set: v => set(v)
 }));
 
@@ -39,3 +41,4 @@ export const useGetDuration = () => usePlayerStore(state => state.duration);
 export const useGetRepeatMode = () => usePlayerStore(state => state.repeatMode);
 export const useToggleRepeatMode = () => usePlayerStore(state => state.toggleRepeatMode);
 export const useGetIsMuted = () => usePlayerStore(state => state.isMuted);
+export const useSetRepeatMode = () => usePlayerStore(state => state.setRepeatMode);

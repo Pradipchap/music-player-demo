@@ -7,9 +7,10 @@ import { ThemedView } from "@/components/themed-view";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { pinkFloydTracks } from "@/services/audioLibrary";
-import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
+import { useGetCurrentTrack, useGetIsPlaying, useSetRepeatMode } from "@/store/audioStore";
 import { useBottomPlayerSheetStore } from "@/store/player-bottom-sheet-store";
 import { useInsertLast, useInsertNext, useSetQueue } from "@/store/queue-store";
+import { REPEAT_MODE } from "@/types";
 import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,10 +20,12 @@ export default function HomeScreen() {
   const isPlaying = useGetIsPlaying();
   const currentTrack = useGetCurrentTrack();
   const add = useSetQueue();
+  const setRepeatMode = useSetRepeatMode();
   const insertNext = useInsertNext();
   const insertLast = useInsertLast();
 
   const addAllToQueue = () => {
+    setRepeatMode(REPEAT_MODE.QUEUE_LOOP);
     add(pinkFloydTracks);
   };
 
