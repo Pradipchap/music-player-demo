@@ -1,6 +1,7 @@
 import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { useHandleRepeatMode } from "@/hooks/use-handle-repeat-mode";
 import { useSeekMusic } from "@/hooks/use-seek-music";
-import { useGetCurrentTrack, useGetIsPlaying, useGetRepeatMode, useToggleRepeatMode } from "@/store/audioStore";
+import { useGetCurrentTrack, useGetIsPlaying } from "@/store/audioStore";
 import { REPEAT_MODE } from "@/types";
 import Slider from "@react-native-community/slider";
 import React, { useEffect, useState } from "react";
@@ -179,11 +180,10 @@ function Seeker() {
 }
 
 function RepeatModeToggler() {
-  const repeatMode = useGetRepeatMode();
-  const toggleRepeatMode = useToggleRepeatMode();
+  const { repeatMode, handleToggleRepeatMode } = useHandleRepeatMode();
 
   return (
-    <TouchableOpacity style={styles.controlButton} onPress={toggleRepeatMode}>
+    <TouchableOpacity style={styles.controlButton} onPress={handleToggleRepeatMode}>
       <CustomIcon name="Repeat" size={24} color={repeatMode === REPEAT_MODE.TRACK_LOOP ? "#666" : "#1DB954"} />
     </TouchableOpacity>
   );

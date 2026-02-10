@@ -1,3 +1,4 @@
+import { REPEAT_MODE } from "@/types";
 import { Asset } from "expo-asset";
 import { Platform } from "react-native";
 import { AudioBufferSourceNode, AudioContext, GainNode } from "react-native-audio-api";
@@ -13,6 +14,8 @@ class AudioManager {
   private gainNode: GainNode | null = null;
   private source?: AudioBufferSourceNode = undefined;
   private nextSource?: AudioBufferSourceNode;
+
+  private repeatMode: REPEAT_MODE = REPEAT_MODE.TRACK_LOOP;
 
   private isManualStop = false;
 
@@ -73,7 +76,7 @@ class AudioManager {
   async preloadAudio({ id, audioUrl }: ILoadAudio) {
     try {
       if (this.checkIfBufferExists({ id, audioUrl })) {
-        return;
+        return this.audioBufferList[id];
       }
 
       const audioContext = this.getAudioContext();
@@ -101,7 +104,9 @@ class AudioManager {
 
   async preloadNextAudio({ audioUrl, id }: ILoadAudio) {
     const nextData = await this.preloadAudio({ audioUrl, id });
-    if (nextData) this.nextAudioBuffer = nextData;
+    if (nextData) {
+      this.nextAudioBuffer = nextData;
+    }
   }
   async scheduleNextAudio() {
     const audioContext = this.getAudioContext();
@@ -179,7 +184,7 @@ class AudioManager {
 
     //only handover the source and nextAudioBuffer if it exists so that track can repeat itself
     //if nextAudioBuffer doesnot exists
-    if (this.nextAudioBuffer && this.source) {
+    if (this.nextAudioBuffer && this.nextSource && this.repeatMode === REPEAT_MODE.QUEUE_LOOP) {
       this.audioBuffer = this.nextAudioBuffer;
       this.source = this.nextSource;
     }
@@ -266,6 +271,9 @@ class AudioManager {
   }
   loopCurrentTrack() {
     if (this.source) this.source.loop = true;
+  }
+  changeRepeatMode(repeatMode: REPEAT_MODE) {
+    this.repeatMode = repeatMode;
   }
 }
 

@@ -9,26 +9,28 @@ interface PlayerState {
   currentTrack: ITrack | null;
   repeatMode: REPEAT_MODE;
   isMuted: boolean;
-  toggleRepeatMode: () => void;
+  toggleRepeatMode: () => REPEAT_MODE;
   set: (v: Partial<PlayerState>) => void;
   setRepeatMode: (v: REPEAT_MODE) => void;
 }
 
-export const usePlayerStore = create<PlayerState>(set => ({
+export const usePlayerStore = create<PlayerState>((set, get) => ({
   isPlaying: false,
   position: 0,
   duration: 0,
   currentTrack: null,
   isMuted: false,
   repeatMode: REPEAT_MODE.TRACK_LOOP,
-  toggleRepeatMode: () =>
-    set(state => {
-      if (state.repeatMode === REPEAT_MODE.QUEUE_LOOP) {
-        return { repeatMode: REPEAT_MODE.TRACK_LOOP };
-      } else {
-        return { repeatMode: REPEAT_MODE.QUEUE_LOOP };
-      }
-    }),
+  toggleRepeatMode: () => {
+    const { repeatMode } = get();
+    if (repeatMode === REPEAT_MODE.QUEUE_LOOP) {
+      set({ repeatMode: REPEAT_MODE.TRACK_LOOP });
+      return REPEAT_MODE.TRACK_LOOP;
+    } else {
+      set({ repeatMode: REPEAT_MODE.QUEUE_LOOP });
+      return REPEAT_MODE.QUEUE_LOOP;
+    }
+  },
   setRepeatMode: (value: REPEAT_MODE) => set({ repeatMode: value }),
   set: v => set(v)
 }));
