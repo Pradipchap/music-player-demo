@@ -3,48 +3,9 @@
 This is a simple application demonstrating gapless audio playback in react native using react-native-audio-api.
 
 # Project Structure
+<img width="639" height="711" alt="Screenshot 2026-02-10 at 4 32 42 PM" src="https://github.com/user-attachments/assets/9ff21645-8da7-4d44-90b8-7e4cf36342bc" />
 
-Project
-├── assets
-│ └── musics
-│ ├── 01.flac
-│ ├── 02.flac
-│ └── ...
-│
-├── src
-│ ├── app
-│ │ ├── \_layout.tsx
-│ │ └── index.tsx # Main screen
-│ │
-│ ├── audio
-│ │ └── audioManager.ts # Handles audio playback logic
-│ │
-│ ├── components
-│ │
-│ ├── constants
-│ │
-│ ├── hooks
-│ │ ├── use-audio-player.ts # Playback hook using AudioManager
-│ │ ├── use-handle-queue.ts # Handles next/replay logic
-│ │ ├── use-seek-music.ts # Audio seeking support
-│ │ └── use-handle-repeat-mode.ts # Repeat mode handling
-│ │
-│ ├── store
-│ │ ├── audioStore.ts # Global audio controls
-│ │ ├── queue-store.ts # Queue management
-│ │ └── player-bottom-sheet-store.ts# Bottom sheet state/actions
-│ │
-│ ├── services
-│ │ └── audioLibrary.ts # Static track provider
-│ │
-│ ├── types
-│ │
-│ └── utils
-│ ├── folder
-│ └── nesting
-│
-├── app.json
-└── package.json
+
 
 # Starting the project
 
