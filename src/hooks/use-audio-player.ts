@@ -67,6 +67,8 @@ export function useAudioPlayer() {
 
     if (nextTrack) {
       set({ currentTrack: nextTrack, isPlaying: true, duration: audioManager.getDuration() });
+    } else {
+      resumeTrack();
     }
   };
 
